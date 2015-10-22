@@ -2,7 +2,12 @@ function [pnl, trades] = PnL(portfolioWeights, trades, dailyRets, dates, ranking
     dateM = [month(dates(1:end,1)),[1;month(dates(1:end-1,1))]];
     newMonthId = [1;find(dateM(:,1) ~= dateM(:,2))]; %1 added for the id of the first month.
     totalPeriod = size(newMonthId,1); % extract total periods from daily returns
-    pnl = zeros(totalPeriod,3);
+    pnl = zeros(totalPeriod,5);
+    %Column 1: Periods
+    %Column 2: Vol timing starategy
+    %Column 3: Min strategy
+    %Column 4: MV strategy
+    %Column 5: Double-sort strategy
     pnl(:,1) = [1:totalPeriod]';
     
     %Calculate pnl for the vol timining strategy
@@ -14,9 +19,14 @@ function [pnl, trades] = PnL(portfolioWeights, trades, dailyRets, dates, ranking
             endRow = size(dailyRets,1);
         end
         monthRets = prod(dailyRets(startRow:endRow,:)+1)-1;
-        ind = find(portfolioWeights(:,1)<= period,1,'last');
+        ind = find(portfolioWeights(1,:,1)<= period,1,'last');
         monthRets(isnan(monthRets))=0;
-        pnl(period, 2) = portfolioWeights(ind,2:end) * monthRets';
+        %Volatility timing strategy
+        pnl(period, 2) = squeeze(portfolioWeights(1,ind,2:end))' * monthRets';
+        %Min strategy
+        pnl(period, 3) = squeeze(portfolioWeights(2,ind,2:end))' * monthRets';
+        %Mv strategy
+        pnl(period, 4) = squeeze(portfolioWeights(3,ind,2:end))' * monthRets';
     end      
     
     %calculate pnl for the double-sort strategy
@@ -27,6 +37,6 @@ function [pnl, trades] = PnL(portfolioWeights, trades, dailyRets, dates, ranking
         trades(i,5) = (prod(dailyRets(startIndex:endIndex,trades(i,3))+1)-1)*trades(i,4);
     end
     trades(isnan(trades(:,5)),5)=0;
-    pnl(:,3) = accumarray(trades(:,1),trades(:,5),[totalPeriod 1],@mean);
+    pnl(:,5) = accumarray(trades(:,1),trades(:,5),[totalPeriod 1],@mean);
  
 end

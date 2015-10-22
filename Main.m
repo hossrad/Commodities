@@ -11,6 +11,7 @@ rollrets = table2array(RawRollReturns);
 dateM = [month(dates(1:end,1)),[1;month(dates(1:end-1,1))]];
 newMonthId = [1;find(dateM(:,1) ~= dateM(:,2))]; %1 added for the id of the first month.
 totalPeriod = size(newMonthId,1); % extract total periods from daily returns
+pfSettings = struct('gamma' ,1,'relativeWts',1,'tz',1);
 %% Nominating Commodities
 tic;
 %double-sort strategy
@@ -18,7 +19,7 @@ disp('Nominating ...');
 nominated = Nominate(rankingPeriod, tradingPeriod, rets, rollrets, dates, numSort1, numSort2);
 
 %volatility timing
-portfolioWeights = CalculateWeights(rankingPeriod, tradingPeriod, dailyRets, dates, tuning);
+portfolioWeights = CalculateWeights(rankingPeriod, tradingPeriod, dailyRets, dates, tuning, pfSettings);
 
 %% Trading
 
