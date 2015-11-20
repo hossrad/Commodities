@@ -1,4 +1,4 @@
-function [ pfStratDesRelWts ] = pfStrat_min( pfWindowXsRtrns, SSconst, pfSettings)
+function [ pfStratDesRelWts ] = pfStrat_min( pfWindowXsRtrns, pfSettings, SSconst)
 % Minimum-variance portfolio 
 % Calculating desired relative weights
 %  This code uses John Cochrane's calculation of desired weights for
@@ -10,6 +10,8 @@ function [ pfStratDesRelWts ] = pfStrat_min( pfWindowXsRtrns, SSconst, pfSetting
 % vlb constraints, we get the same answer as the John Cochrane methodology
 %
 %
+%% Remove Nan columns and add them back later with zero weight
+
 [~,colNans] = find(isnan(pfWindowXsRtrns));
 colNans = unique(colNans);
 
@@ -27,23 +29,23 @@ gamma= pfSettings.gamma;
 x0 = 1/N*ones(1,N);
 Aeq = ones(1,N);
 Beq = 1;
-vlb = zeros(1,N);           
-%vlb = -1000*ones(1,N);
-%vlb = -1*ones(1,N);
-%vub = 1000*ones(1,N);
+if SSconst ~= 0 
+    vlb = zeros(1,N); 
+else
+    vlb = -1*ones(1,N);
+end
 vub = ones(1,N);
 options = optimset('TolCon',1*10^-6','TolX',1*10^-6,...
     'TolFun',1*10^-6,'MaxFunEvals',1*10^6,...
     'Display','none','Algorithm','interior-point','LargeScale','on',...
     'FinDiffType','central');
-
-%vlb = -1000*ones(1,N);        
+      
 %% 
  
 
 v1 = ones(N,1);   
 
-pfCovIS = cov(pfWindowXsRtrns);                          % [NxN] in-sample asset variance-covariance
+pfCovIS = cov(pfWindowXsRtrns);     % [NxN] in-sample asset variance-covariance
 
 %Portfolio weights
 if SSconst == 1 || SSconst == 2     % Short sales constraints enforced
@@ -77,6 +79,7 @@ end
                                      
 %pfStratDesRelWts = pfWts/abs(v1'*pfWts);                           % [Nx1] relative portfolio weights
 
+%% Add back NaN columns that were deleted in the beginning.
 %Replace NaN columns with zero weights
 temp = pfStratDesRelWts;
 pfStratDesRelWts = zeros(originalN,1);

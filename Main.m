@@ -5,6 +5,7 @@ numSort2 = 4; % 2*numSort2 will be nominated after second sort
 rankingPeriod = 12;
 tradingPeriod = 1;
 tuning = 4;
+SSConst = 1; % 1 for Short Sell Constraint, 0 Otherwise.
 pnl=[];
 rets = table2array(RawReturns);
 rollrets = table2array(RawRollReturns);
@@ -19,7 +20,7 @@ disp('Nominating ...');
 nominated = Nominate(rankingPeriod, tradingPeriod, rets, rollrets, dates, numSort1, numSort2);
 
 %volatility timing
-portfolioWeights = CalculateWeights(rankingPeriod, tradingPeriod, dailyRets, dates, tuning, pfSettings);
+portfolioWeights = CalculateWeights(rankingPeriod, tradingPeriod, dailyRets, dates, tuning, pfSettings, SSConst);
 
 %% Trading
 
@@ -27,3 +28,6 @@ trades = Trade(nominated, rankingPeriod, tradingPeriod, totalPeriod, numSort2);
 
 [pnl,trades] = PnL (portfolioWeights, trades, dailyRets, dates, rankingPeriod, tradingPeriod);
 trades;
+
+PNL = array2table(pnl,'VariableNames',{'Month' 'VT' 'MIN' 'MV' 'DS'});
+output;

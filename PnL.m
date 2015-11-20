@@ -19,14 +19,14 @@ function [pnl, trades] = PnL(portfolioWeights, trades, dailyRets, dates, ranking
             endRow = size(dailyRets,1);
         end
         monthRets = prod(dailyRets(startRow:endRow,:)+1)-1;
-        ind = find(portfolioWeights(1,:,1)<= period,1,'last');
+        ind = find(portfolioWeights.VolTiming(:,1)<= period,1,'last');
         monthRets(isnan(monthRets))=0;
         %Volatility timing strategy
-        pnl(period, 2) = squeeze(portfolioWeights(1,ind,2:end))' * monthRets';
+        pnl(period, 2) = portfolioWeights.VolTiming(ind,2:end) * monthRets';
         %Min strategy
-        pnl(period, 3) = squeeze(portfolioWeights(2,ind,2:end))' * monthRets';
+        pnl(period, 3) = portfolioWeights.MinVar(ind,2:end) * monthRets';
         %Mv strategy
-        pnl(period, 4) = squeeze(portfolioWeights(3,ind,2:end))' * monthRets';
+        pnl(period, 4) = portfolioWeights.MeanVar(ind,2:end) * monthRets';
     end      
     
     %calculate pnl for the double-sort strategy

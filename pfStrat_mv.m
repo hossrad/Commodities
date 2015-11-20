@@ -24,18 +24,17 @@ pfCovIS = cov(pfWindowXsRtrns);                                             % [N
 x0 = 1/N*ones(1,N);
 Aeq = ones(1,N);
 Beq = 1;
-vlb = zeros(1,N);           
-%vlb = -1000*ones(1,N);
-%vlb = -1*ones(1,N);
-%vub = 1000*ones(1,N);
+if SSconst ~= 0 
+    vlb = zeros(1,N);  
+else
+    vlb = -1*ones(1,N);
+end
 vub = ones(1,N);
 options = optimset('TolCon',1*10^-6','TolX',1*10^-6,...
     'TolFun',1*10^-6,'MaxFunEvals',1*10^6,...
     'Display','none','Algorithm','interior-point','LargeScale','on',...
     'FinDiffType','central');
 %% 
-
-
 
 if pfSettings.tz == 1
     pfCovIS = (M/(M-N-2))*pfCovIS; % Scale it according to TZ 2011
@@ -64,6 +63,7 @@ end
 %pfStratDesRelWts = pfWts;
 %pfStratDesRelWts = pfWts/abs(v1'*pfWts);       % [NxT] relative portfolio weights
 
+%% Add back NaN columns that were deleted in the beginning.
 %Replace NaN columns with zero weights
 temp = pfStratDesWts;
 pfStratDesWts = zeros(originalN,1);
